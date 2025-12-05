@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { useMusicStore } from '../store/musicStore';
+import { moodPlaylists } from '../data/playlists';
 
 export const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const {
+    selectedMood,
     currentTrack,
     isPlaying,
     currentTime,
@@ -13,6 +15,7 @@ export const AudioPlayer = () => {
     isMuted,
     setIsPlaying,
     setCurrentTime,
+    setCurrentTrack,
     setVolume,
     toggleMute,
   } = useMusicStore();
@@ -67,6 +70,28 @@ export const AudioPlayer = () => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const handlePreviousTrack = () => {
+    if (!selectedMood || !currentTrack) return;
+    const playlist = moodPlaylists.find((p) => p.mood === selectedMood);
+    if (!playlist) return;
+    
+    const currentIndex = playlist.tracks.findIndex((t) => t.id === currentTrack.id);
+    const previousIndex = currentIndex > 0 ? currentIndex - 1 : playlist.tracks.length - 1;
+    setCurrentTrack(playlist.tracks[previousIndex]);
+    setIsPlaying(true);
+  };
+
+  const handleNextTrack = () => {
+    if (!selectedMood || !currentTrack) return;
+    const playlist = moodPlaylists.find((p) => p.mood === selectedMood);
+    if (!playlist) return;
+    
+    const currentIndex = playlist.tracks.findIndex((t) => t.id === currentTrack.id);
+    const nextIndex = currentIndex < playlist.tracks.length - 1 ? currentIndex + 1 : 0;
+    setCurrentTrack(playlist.tracks[nextIndex]);
+    setIsPlaying(true);
+  };
+
   if (!currentTrack) return null;
 
   return (
@@ -78,7 +103,7 @@ export const AudioPlayer = () => {
       <audio
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleNextTrack}
       />
 
       {/* Progress Bar */}
@@ -107,6 +132,7 @@ export const AudioPlayer = () => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
+          onClick={handlePreviousTrack}
           className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
           aria-label="Previous track"
         >
@@ -126,6 +152,7 @@ export const AudioPlayer = () => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
+          onClick={handleNextTrack}
           className="p-3 rounded-full bg-gray-700 text-white hover:bg-gray-600 transition-colors"
           aria-label="Next track"
         >
