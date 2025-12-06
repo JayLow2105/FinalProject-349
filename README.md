@@ -135,6 +135,10 @@ Works on all modern browsers that support:
 
 MIT
 
+## Live URL:
+
+https://jaylow2105.github.io/FinalProject-349/
+
 ## Author
 
 Quoc Nguyen
